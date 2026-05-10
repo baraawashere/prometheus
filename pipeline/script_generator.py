@@ -7,13 +7,8 @@ load_dotenv()
 
 client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-
-def generate_script(
-    topic: str,
-    num_sections: int = 4,
-    length_instruction: str = "Each section should be 2-3 sentences long.",
-) -> list[dict]:
-    prompt = f"""You are a documentary script writer. Write an educational script about: {topic}
+def generate_script(topic: str, num_sections: int = 4, length_instruction: str = "Each section should be 2-3 sentences long.", tone: str = "Documentary") -> list[dict]:
+    prompt = f"""You are a documentary script writer. Write a {tone.lower()} style educational script about: {topic}
 
 Split the script into exactly {num_sections} sections.
 {length_instruction}
@@ -39,8 +34,6 @@ Respond ONLY in this JSON format, no extra text, no markdown:
     )
 
     raw = response.content[0].text
-
-    # Strip markdown code blocks if present
     raw = raw.strip()
     if raw.startswith("```"):
         parts = raw.split("```")
@@ -48,7 +41,6 @@ Respond ONLY in this JSON format, no extra text, no markdown:
             raw = parts[1]
         if raw.startswith("json"):
             raw = raw[4:]
-
     raw = raw.strip()
     sections = json.loads(raw)
     return sections
